@@ -14,6 +14,8 @@ use Auth;
 
 use Response;
 
+use Image;
+
 
 class ChatController extends Controller
 {
@@ -67,11 +69,20 @@ class ChatController extends Controller
         $chat->approved = true;
         $chat->user()->associate($user);
 
+        //save our image
+        if($request->hasFile('image_upload')){
+          $image = $request->file('image_upload');
+          $filename = time() . '.' . $image->getClientOriginalExtension();
+          $location = public_path('images/chats/' . $filename);
+          Image::make($image)->resize(800, 400)->save($location);
+
+          $chat->img_file = $filename;
+        }
+
         $chat->save();
 
-        //return Response::json($chat);
 
-
+         return redirect()->route('chats.index');
     }
 
     /**
